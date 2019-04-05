@@ -47,6 +47,11 @@ ggplot(data = climas) +
 # pega os valores de 'x' e conta quantas vezes apareceu
 qplot(x=tmax, y=cidade, data = climas,  color=I('pink'), fill=I('black'))
 
+# QUERIA VER A EVOLU«√O M…DIA DAS CHUVAS EM CG E EM JP. ou faz pela semana ou pela mÈdia para o mÍs.
+climas %>%
+  ggplot() +
+    geom_line(aes(x = semana, y = tmedia, color = cidade))
+
 
 ### As temperaturas m√°ximas semanais (o pico do calor) s√£o t√£o diferentes quanto as m√©dias? Mais? ACHO QUE N√ÉO ENTENDI A PERGUNTA. here!!!
 
