@@ -34,20 +34,20 @@ glimpse(climas)
 
 ## Temperatura
 
-### Onde é mais quente? O QUE ELE QUER DIZER COM MAIS QUENTE? ONDE CHEGAM AS TEMPERATURAS MAIS ALTAS OU ONDE A TEM M�DIA � MAIOR?
+### Onde é mais quente? O CONCEITO DE MAIS QUENTE PODE SER MÁXIMAS OU MÉDIAS TEMPERATURAS. VOU CONSIDERAR AS MÉDIAS, PQ  QUERO VER "NORMALMENTE".
 
 # Esse mostra que em CG a temperatura é mais variada do que em JP
 ggplot(data = climas) + 
-  geom_point(mapping = aes(tmax, cidade))
+  geom_point(mapping = aes(tmedia, cidade))
   
 # Esse mostra que em CG a temperatura máxima varia mais do que em JP
 ggplot(data = climas) + 
-  geom_jitter(mapping = aes(tmax, cidade))
+  geom_jitter(mapping = aes(tmedia, cidade))
   
 # pega os valores de 'x' e conta quantas vezes apareceu
-qplot(x=tmax, y=cidade, data = climas,  color=I('pink'), fill=I('black'))
+qplot(x=tmedia, y=cidade, data = climas,  color=I('pink'), fill=I('black'))
 
-# QUERIA VER A EVOLU��O M�DIA DAS CHUVAS EM CG E EM JP. ou faz pela semana ou pela m�dia para o m�s.
+# QUERIA VER A EVOLU??O M?DIA DAS CHUVAS EM CG E EM JP. ou faz pela semana ou pela m?dia para o m?s.
 climas %>%
   ggplot() +
     geom_line(aes(x = semana, y = tmedia, color = cidade))
@@ -82,13 +82,14 @@ clima_mes_6_em_cg %>%
   summarise(total_max = sum(tmax), total_media = sum(tmedia), maximo = first(tmax))
   
   
-# calculando o total para todos os anos em campina grande. O arrange faz a ordena��o.
+# calculando o total para todos os anos em campina grande. O arrange faz a ordena??o.
 clima_mes_6_em_cg %>% 
   group_by(ano) %>% 
   summarise(total_min = sum(tmin)) %>% 
   arrange(total_min)
+
   
-# Ent�o, considerando a soma das temperaturas m�nimas por semana, o ano de 2018 teve o SJ mais frio. 
+# Ent?o, considerando a soma das temperaturas m?nimas por semana, o ano de 2018 teve o SJ mais frio. 
 
 
 ## Chuva
@@ -98,6 +99,23 @@ clima_mes_6_em_cg %>%
 ### Como é a distribuição do volume de chuvas por semana em JP e CG? A chuva varia mais ou menos que a temperatura? O formato da distribuição é igual? 
 
 ### No geral, onde chove mais?
+
+# quero os registros com a média dos meses, com a máxima e mínima dos meses
+
+# calculando o total para todos os meses em campina grande. O arrange faz a ordena??o.
+dados_chuva <- climas %>% 
+  group_by(ano, mes, cidade) %>% 
+  filter(ano == 2018) %>%
+  summarise(total_min = sum(tmedia)) %>% 
+  arrange(ano)
+
+dados_chuva
+
+# Agr e só gerar o gráfico de barras
+ggplot(dados_chuva, aes(mes, total_min)) +   
+  geom_bar(aes(fill = cidade), position = "dodge", stat="identity")
+  
+# Então, no geral, choveu mais em João Pessoa no ano de 2018. (analisar nos dados, se removendo o filter junta todos os anos)
 
 ### A distribuição é diferente em meses específicos? 
 
