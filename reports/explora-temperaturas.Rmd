@@ -22,7 +22,7 @@ glimpse(climas)
 
 ## Temperatura
 
-### Onde Ã© mais quente? 
+### Onde é mais quente? 
 
 <!--# Temperatura média~~ -->
 ```{r}
@@ -41,33 +41,11 @@ tem_max <- ggplot(data = climas) +
 grid.arrange(tem_media , tem_max , ncol=2)
 ```
 
-### Análise: Analisando os gráficos podemos ver que Campina Grande tem as maiores temperaturas máximas, mas João Pessoa tem as maiores temperaturas médias. 
+Analisando os gráficos podemos ver que Campina Grande tem as maiores temperaturas máximas, mas João Pessoa tem as maiores temperaturas médias. 
 
-<!--
-### As temperaturas mÃ¡ximas semanais (o pico do calor) sÃ£o tÃ£o diferentes quanto as mÃ©dias? Mais? ACHO QUE NÃƒO ENTENDI A PERGUNTA. here!!!
+<!--### Quais os meses mais quentes e mais frios?
 
-# Quero entender como a mÃ©dia ou a mediana de uma variÃ¡vel se comportam em relaÃ§Ã£o a outra variÃ¡vel
-# dlpyR permite dividir uma estrutura de dados e aplicar funÃ§Ãµes a partes dos dados, ex: filter(), group_by(), mutate() e arrange()
-
-# Agrupando a estrutura de dados por semana. JÃ Ã‰ AGRUPADO POR SEMANA!
-temp_por_semanas <- group_by(climas, semana)
-temp_por_ano <- group_by(climas, ano)
-medias <- summarise(temp_por_semanas,
-          tmax_mean = mean(tmax),
-          tmedia_median = mean(tmedia),
-          n = n()) # pega o nÃºmero de pessoas em cada grupo
-medias
--->
-
-
-<!--### Quais os meses mais quentes e mais frios?-->
-
-
-
-
-
-
-### Qual foi o SÃ£o JoÃ£o mais frio de CG que estÃ¡ nos nossos dados?
+### Qual foi o São João mais frio de CG que está nos nossos dados?-->
 
 <!--# FILTRA OS DADOS POR 6 -->
 ```{r}
@@ -84,18 +62,17 @@ dados_cg_10_anos %>%
   arrange(temperatura) %>%
   top_n(n = -3, wt = temperatura) %>%
   ggplot(aes(x = ano, y = temperatura), group=1) +
-  geom_point(size=3, color="red") +
-  xlab("ano")
+  geom_point(size=3, color="red")
 ```
 
-### Análise: Considerando a média das temperaturas mínimas em Campina Grande no mês de Junho nos últimos 10 anos, o ano de 2015 teve o São João mais frio. Seguido por 2011 e 2018. 
+Considerando a média das temperaturas mínimas em Campina Grande no mês de Junho nos últimos 10 anos, o ano de 2015 teve o São João mais frio. Seguido por 2011 e 2018. 
 
 
 ## Chuva
 
-### Quanto chove por semana em JP e CG?
+<!-- ### Quanto chove por semana em JP e CG?
 
-### Como Ã© a distribuiÃ§Ã£o do volume de chuvas por semana em JP e CG? A chuva varia mais ou menos que a temperatura? O formato da distribuiÃ§Ã£o Ã© igual? 
+### Como Ã© a distribuiÃ§Ã£o do volume de chuvas por semana em JP e CG? A chuva varia mais ou menos que a temperatura? O formato da distribuiÃ§Ã£o Ã© igual? -->
 
 ### No geral, onde chove mais?
 
@@ -103,14 +80,29 @@ dados_cg_10_anos %>%
 ```{r}
 dados_chuva <- climas %>% 
   group_by(ano, mes, cidade) %>% 
-  summarise(total_min = sum(tmedia)) %>% 
+  summarise(chuva_media = mean(chuva)) %>% 
   arrange(ano)
 
-ggplot(dados_chuva, aes(mes, total_min)) +   
-  geom_bar(aes(fill = cidade), position = "dodge", stat="identity")
+ggplot(dados_chuva, aes(mes, chuva_media)) +   
+  geom_bar(aes(fill = cidade), position = "dodge", stat="identity") + 
+  scale_x_continuous("Mês", breaks = seq(1,12,1)) +
+  scale_y_continuous("Chuva média", breaks = seq(0,150,50))
 ```
 
-### Análise: No geral, choveu mais em JoÃ£o Pessoa. 
+Analisando as chuvas médias ao longo dos meses do ano em Campina Grande e João Pessoa, observamos que, em média, chove mais em João Pessoa. 
 
-### A distribuiÃ§Ã£o Ã© diferente em meses especÃ­ficos? 
+### A distribuição é diferente em meses específicos?
+```{r}
+clima_por_mes_cidade <- climas %>%
+  group_by(mes, cidade) %>%
+  summarise(media_chuva = mean(chuva)) 
 
+  ggplot(clima_por_mes_cidade, aes(x= mes,y = media_chuva, colour = cidade)) +
+  geom_area(aes(fill=cidade)) +
+  scale_y_continuous("Chuva", breaks = seq(0,150,50)) +
+  scale_x_continuous("Mês", breaks = seq(1,12,1))
+```
+
+No gráfico acima, podemos observar a distribuição de chuva média ao longo dos meses do ano em Campina Grande e em João Pessoa. Podemos notar que existem meses em que chove mais e outros em que chove menos. Mais especificamente, nos meses de abril a julho, temos uma maior média de chuvas e no final e início do ano, temos menos chuvas. 
+
+Considerações gerais: É importante observar que podemos ter dados incompletos e/ou incorretos. Portanto, não é seguro generalizar as informações aqui apresentadas.
