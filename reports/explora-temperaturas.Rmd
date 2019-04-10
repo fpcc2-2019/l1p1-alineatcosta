@@ -7,52 +7,43 @@ theme: sandstone
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-library(tidyverse)
-library(here)
-library(lubridate)
-library(ggbeeswarm)
 library(ggplot2)
 library(readr)
-dataset <- read_csv(NULL)
-View(dataset)
-
-install.packages("ggplot2")
-theme_set(theme_bw())
-
-install.packages('dplyr')
 library(dplyr)
+library(gridExtra)
+
 ```
 
 ```{r read}
-# Tem a leitura de outra forma
 climas = read_csv("../data/clima_cg_jp-semanal.csv")
 
 glimpse(climas)
 ```
 
-## colunas cidade,semana,tmedia,tmax,tmin,chuva,mes,ano
-
 ## Temperatura
 
-### Onde é mais quente? O CONCEITO DE MAIS QUENTE PODE SER MÁXIMAS OU MÉDIAS TEMPERATURAS. VOU CONSIDERAR AS MÉDIAS, PQ  QUERO VER "NORMALMENTE".
+### Onde é mais quente? 
 
-# Esse mostra que em CG a temperatura é mais variada do que em JP
-ggplot(data = climas) + 
-  geom_point(mapping = aes(tmedia, cidade))
-  
-# Esse mostra que em CG a temperatura máxima varia mais do que em JP
-ggplot(data = climas) + 
-  geom_jitter(mapping = aes(tmedia, cidade))
-  
-# pega os valores de 'x' e conta quantas vezes apareceu
-qplot(x=tmedia, y=cidade, data = climas,  color=I('pink'), fill=I('black'))
+<!--# Temperatura m�dia~~ -->
+```{r}
+tem_media <- ggplot(data = climas) + 
+  geom_point(mapping = aes(cidade, tmedia))
+```
 
-# QUERIA VER A EVOLU??O M?DIA DAS CHUVAS EM CG E EM JP. ou faz pela semana ou pela m?dia para o m?s.
-climas %>%
-  ggplot() +
-    geom_line(aes(x = semana, y = tmedia, color = cidade))
+<!--# Temperatura m�xima-->
+```{r}
+tem_max <- ggplot(data = climas) + 
+  geom_point(mapping = aes(cidade, tmax))
+```
 
+<!--# Plotando dois deles (em colunas)-->
+```{r}
+grid.arrange(tem_media , tem_max , ncol=2)
+```
 
+### An�lise: Analisando os gr�ficos podemos ver que Campina Grande tem as maiores temperaturas m�ximas, mas Jo�o Pessoa tem as maiores temperaturas m�dias. 
+
+<!--
 ### As temperaturas máximas semanais (o pico do calor) são tão diferentes quanto as médias? Mais? ACHO QUE NÃO ENTENDI A PERGUNTA. here!!!
 
 # Quero entender como a média ou a mediana de uma variável se comportam em relação a outra variável
@@ -66,30 +57,38 @@ medias <- summarise(temp_por_semanas,
           tmedia_median = mean(tmedia),
           n = n()) # pega o número de pessoas em cada grupo
 medias
+-->
 
 
-### Quais os meses mais quentes e mais frios? 
+<!--### Quais os meses mais quentes e mais frios?-->
+
+
+
+
 
 
 ### Qual foi o São João mais frio de CG que está nos nossos dados?
 
-# FILTRA O MÊS POR 6
-clima_mes_6 <- subset(climas, mes == 6)
-clima_mes_6_em_cg <- subset(clima_mes_6, cidade == "Campina Grande")
-# calculando o total para o ano 2006 em campina grande
-clima_mes_6_em_cg %>% 
-  filter(ano == "2006") %>% 
-  summarise(total_max = sum(tmax), total_media = sum(tmedia), maximo = first(tmax))
+<!--# FILTRA OS DADOS POR 6 -->
+```{r}
+dados_cg_10_anos <- filter(climas, mes == 6) %>%
+              filter(cidade == "Campina Grande") %>%
+              filter (ano > "2009")
+```
   
-  
-# calculando o total para todos os anos em campina grande. O arrange faz a ordena??o.
-clima_mes_6_em_cg %>% 
+<!--# calculando o total para todos os anos em campina grande. O arrange faz a ordena??o. -->
+```{r}
+dados_cg_10_anos %>% 
   group_by(ano) %>% 
-  summarise(total_min = sum(tmin)) %>% 
-  arrange(total_min)
+  summarise(temperatura = mean(tmedia)) %>%
+  arrange(temperatura) %>%
+  top_n(n = -3, wt = temperatura) %>%
+  ggplot(aes(x = ano, y = temperatura), group=1) +
+  geom_point(size=3, color="red") +
+  xlab("ano")
+```
 
-  
-# Ent?o, considerando a soma das temperaturas m?nimas por semana, o ano de 2018 teve o SJ mais frio. 
+### An�lise: Considerando a m�dia das temperaturas m�nimas em Campina Grande no m�s de Junho nos �ltimos 10 anos, o ano de 2015 teve o S�o Jo�o mais frio. Seguido por 2011 e 2018. 
 
 
 ## Chuva
@@ -100,22 +99,18 @@ clima_mes_6_em_cg %>%
 
 ### No geral, onde chove mais?
 
-# quero os registros com a média dos meses, com a máxima e mínima dos meses
-
-# calculando o total para todos os meses em campina grande. O arrange faz a ordena??o.
+<!-- # calculando o total para todos os meses em campina grande. -->
+```{r}
 dados_chuva <- climas %>% 
   group_by(ano, mes, cidade) %>% 
-  filter(ano == 2018) %>%
   summarise(total_min = sum(tmedia)) %>% 
   arrange(ano)
 
-dados_chuva
-
-# Agr e só gerar o gráfico de barras
 ggplot(dados_chuva, aes(mes, total_min)) +   
   geom_bar(aes(fill = cidade), position = "dodge", stat="identity")
-  
-# Então, no geral, choveu mais em João Pessoa no ano de 2018. (analisar nos dados, se removendo o filter junta todos os anos)
+```
+
+### An�lise: No geral, choveu mais em João Pessoa. 
 
 ### A distribuição é diferente em meses específicos? 
 
